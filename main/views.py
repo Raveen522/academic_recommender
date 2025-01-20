@@ -76,9 +76,23 @@ def interest_selection_view(request):
     return render(request, 'main/interest_selection.html')
 
 # Dashboard view
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+
 @login_required
 def dashboard_view(request):
     if request.method == "POST" and "logout" in request.POST:
         logout(request)
         return redirect("login")
-    return render(request, "main/dashboard.html", {"user": request.user})
+    
+    # Get the user's profile and interests
+    user_profile = request.user.profile
+    interests = user_profile.interests.split(',') if user_profile.interests else []
+    
+    return render(request, "main/dashboard.html", {
+        "user": request.user,
+        "first_name": user_profile.first_name,
+        "interests": interests
+    })
+

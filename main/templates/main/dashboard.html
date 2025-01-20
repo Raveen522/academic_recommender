@@ -1,5 +1,87 @@
-<h3>Welcome {{ user.username }}</h3>
-<form method="post">
-    {% csrf_token %}
-    <button name="logout">Logout</button>
-</form>
+{% extends "main/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 bg-light p-4 border-right">
+            <h4 class="mb-4">Hi, {{ first_name }}!</h4>
+
+            <!-- Home and Logout icon buttons -->
+            <div class="mb-4 d-flex justify-content-start">
+                <button class="btn btn-primary" onclick="window.location.reload();" title="Home">
+                    <i class="bi bi-house-door"></i> <!-- Home icon -->
+                </button>
+                <form method="post" action="{% url 'dashboard' %}">
+                    {% csrf_token %}
+                    <button type="submit" name="logout" class="btn btn-danger" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i> <!-- Logout icon -->
+                    </button>
+                </form>
+            </div>
+
+            <!-- Dropdown for subjects -->
+            <div class="mb-4">
+                <label for="subjectsDropdown" class="form-label">Select your academic interests</label>
+                <select id="subjectsDropdown" class="form-select">
+                    <option>Computer Science</option>
+                    <option>Mathematics</option>
+                    <option>Electronics</option>
+                    <option>Industrial Management</option>
+                </select>
+            </div>
+
+            <!-- Display user-selected interests -->
+            <div class="mb-4">
+                <h5>Your Selected Interests:</h5>
+                <ul id="userInterests">
+                    {% for interest in interests %}
+                        <li>{{ interest }}</li>
+                    {% empty %}
+                        <li>No interests selected</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Primary Area -->
+        <div class="col-md-9">
+            <div class="container-fluid p-4">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search..." aria-label="Search">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="bi bi-search"></i> <!-- Bootstrap Icons for search icon -->
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs (Recommendations and History) -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="recommendations-tab" data-bs-toggle="tab" href="#recommendations" role="tab" aria-controls="recommendations" aria-selected="true">Recommendations</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" role="tab" aria-controls="history" aria-selected="false">History</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="myTabContent">
+                    <!-- Recommendations Tab -->
+                    <div class="tab-pane fade show active" id="recommendations" role="tabpanel" aria-labelledby="recommendations-tab">
+                        <!-- Content for Recommendations will go here -->
+                        <p>Your personalized recommendations will be shown here.</p>
+                    </div>
+
+                    <!-- History Tab -->
+                    <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+                        <!-- Content for History will go here -->
+                        <p>Your search or browsing history will be shown here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
