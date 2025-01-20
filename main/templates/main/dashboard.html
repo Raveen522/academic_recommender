@@ -1,0 +1,5 @@
+<h3>Welcome {{ user.username }}</h3>
+<form method="post">
+    {% csrf_token %}
+    <button name="logout">Logout</button>
+</form>
