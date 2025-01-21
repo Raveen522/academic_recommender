@@ -17,3 +17,19 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+# added this model on 21/01/2025
+class Article(models.Model):
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    tags = models.TextField()  # Store as comma-separated values
+    topic = models.CharField(max_length=255)
+    read_time = models.IntegerField()
+    claps = models.IntegerField()
+    url = models.URLField()
+    date_posted = models.DateField()
+    subject = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.title
+    

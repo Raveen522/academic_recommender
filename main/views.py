@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import UserProfile
 from django.contrib.auth.decorators import login_required
+from main.utils.recommendation import get_recommendations
 
 # Login view
 def login_view(request):
@@ -76,23 +77,22 @@ def interest_selection_view(request):
     return render(request, 'main/interest_selection.html')
 
 # Dashboard view
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-
 @login_required
 def dashboard_view(request):
     if request.method == "POST" and "logout" in request.POST:
         logout(request)
         return redirect("login")
     
-    # Get the user's profile and interests
-    user_profile = request.user.profile
-    interests = user_profile.interests.split(',') if user_profile.interests else []
-    
+    user_profile = request.user.profile.interests  # User's interests as a string
+    recommendations = get_recommendations(user_profile)
+
+    # Process tags for each recommendation
+    for article in recommendations.to_dict('records'):
+        article['tags_list'] = article['tags'].split(',') if article['tags'] else []
+
     return render(request, "main/dashboard.html", {
         "user": request.user,
-        "first_name": user_profile.first_name,
-        "interests": interests
+        "first_name": request.user.profile.first_name,
+        "interests": user_profile.split(','),
+        "recommendations": recommendations.to_dict('records'),
     })
-
