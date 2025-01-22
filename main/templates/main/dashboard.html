@@ -72,38 +72,84 @@
                     <!-- Recommendations Tab -->
                     <div class="tab-pane fade show active" id="recommendations" role="tabpanel" aria-labelledby="recommendations-tab">
                         <div class="row">
-                            {% for article in recommendations %}
-                            <div class="col-md-6 mb-4">
-                                <div class="card">
-                                    <div class="title-section">
-                                        <h4 class="mb-0">{{ article.title }}</h4>
-                                    </div>
-                                    <div class="row g-0">
-                                        <div class="col-12 col-md-4 info-section">
-                                            <small class="text-muted meta-text">Author: {{ article.author }}</small>
-                                            <small class="text-muted meta-text">Read Time: {{ article.read_time }} mins</small>
-                                            <small class="text-muted meta-text">Subject: {{ article.subject }}</small>
-                                        </div>
-                                        <div class="col-12 col-md-6 info-section">
-                                            <small class="text-muted d-block mb-2">Tags:</small>
-                                            <div class="d-flex flex-wrap">
-                                                {% for tag in article.tags|split:" " %}
-                                                    <span class="tag d-inline-block me-2 mb-2">
-                                                        <i class="fas fa-tag"></i> {{ tag }}
-                                                    </span>
-                                                {% endfor %}
+
+                            <div class="container">
+                                <h2>Welcome, {{ first_name }}</h2>
+                                <p>Your interests: {{ interests|join:", " }}</p>
+                                
+                                <div class="row">
+                                    {% for article in recommendations %}
+                                    <div class="col-md-4">
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ article.title }}</h5>
+                                                <p class="card-text">
+                                                    Tags: 
+                                                    {% for tag in article.tags_list %}
+                                                    <span class="badge bg-secondary">{{ tag }}</span>
+                                                    {% endfor %}
+                                                </p>
+                                                <a href="{{ article.url }}" class="btn btn-primary" target="_blank">Read More</a>
+                                            </div>
+                                            <div class="card-footer text-end">
+                                                <button 
+                                                    class="btn btn-outline-success like-btn {% if article.reaction == 'like' %}active{% endif %}" 
+                                                    data-article-id="{{ article.id }}" 
+                                                    data-reaction="like">
+                                                    👍 Like
+                                                </button>
+                                                <button 
+                                                    class="btn btn-outline-danger dislike-btn {% if article.reaction == 'dislike' %}active{% endif %}" 
+                                                    data-article-id="{{ article.id }}" 
+                                                    data-reaction="dislike">
+                                                    👎 Dislike
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="card-footer">
-                                        <!-- Add the "Read the article" link -->
-                                        <a href="{{ article.url }}" class="text-primary" target="_blank">Read the article</a>
-                                    </div>
-                                                                  
+                                    {% endfor %}
                                 </div>
                             </div>
-                            {% endfor %}
+                            
+                            <script>
+                                document.addEventListener("DOMContentLoaded", () => {
+                                    const buttons = document.querySelectorAll(".like-btn, .dislike-btn");
+                            
+                                    buttons.forEach(button => {
+                                        button.addEventListener("click", (e) => {
+                                            const articleId = e.target.getAttribute("data-article-id");
+                                            const reaction = e.target.getAttribute("data-reaction");
+                            
+                                            fetch("{% url 'react_to_article' %}", {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/x-www-form-urlencoded",
+                                                    "X-CSRFToken": "{{ csrf_token }}"
+                                                },
+                                                body: `article_id=${articleId}&reaction=${reaction}`
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    // Update button styles based on the reaction
+                                                    buttons.forEach(btn => {
+                                                        if (btn.getAttribute("data-article-id") === articleId) {
+                                                            if (btn.getAttribute("data-reaction") === reaction) {
+                                                                btn.classList.add("active");
+                                                            } else {
+                                                                btn.classList.remove("active");
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            })
+                                            .catch(error => console.error("Error:", error));
+                                        });
+                                    });
+                                });
+                            </script>
+                            
+                            
                         </div>
                     </div>
                     

@@ -18,7 +18,7 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
-# added this model on 21/01/2025
+
 class Article(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
@@ -33,3 +33,21 @@ class Article(models.Model):
     def __str__(self):
         return self.title
     
+
+class UserReaction(models.Model):
+    LIKE = 'like'
+    DISLIKE = 'dislike'
+    REACTION_CHOICES = [
+        (LIKE, 'Like'),
+        (DISLIKE, 'Dislike'),
+    ]
+
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='reactions')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='reactions')
+    reaction = models.CharField(max_length=10, choices=REACTION_CHOICES)
+
+    class Meta:
+        unique_together = ('user_profile', 'article')  # Ensure one reaction per article per user
+
+    def __str__(self):
+        return f"{self.user_profile.user.username} - {self.article.title} - {self.reaction}"

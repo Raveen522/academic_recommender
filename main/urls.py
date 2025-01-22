@@ -6,4 +6,5 @@ urlpatterns = [
     path("signup/", views.signup_view, name="signup"),
     path("interest-selection/", views.interest_selection_view, name="interest_selection"),
     path("dashboard/", views.dashboard_view, name="dashboard"),
+    path("react-to-article/", views.react_to_article, name="react_to_article"),
 ]
