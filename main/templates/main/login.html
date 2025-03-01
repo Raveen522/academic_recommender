@@ -1,24 +1,33 @@
 {% extends "main/base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <form method="post" class="p-4 border rounded bg-light shadow-sm">
-            {% csrf_token %}
-            <h4 class="text-center mb-4">Login</h4>
-            <div class="mb-3">
-                <label for="username" class="form-label">Username or Email</label>
-                <input type="text" name="username" class="form-control" id="username" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-            <p class="text-center mt-3">
-                Don't have an account? <a href="{% url 'signup' %}">Create one</a>
-            </p>
-        </form>
+<div class="container mt-5">
+    <div class="row justify-content-center mb-2">
+        <div class="col-md-6 text-center">
+            <h1 class="display-5 fw-bold mb-2"> 📚 <br> Academic Recommender</h1>
+            <p class="lead text-muted mb-2">Your study material partner</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <form method="post" class="p-4 border rounded bg-light shadow-sm">
+                {% csrf_token %}
+                <h4 class="text-center mb-4">Login</h4>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username or Email</label>
+                    <input type="text" name="username" class="form-control" id="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+                <p class="text-center mt-3">
+                    Don't have an account? <a href="{% url 'signup' %}">Create one</a>
+                </p>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

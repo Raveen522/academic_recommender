@@ -26,6 +26,7 @@ class Article(models.Model):
     topic = models.CharField(max_length=255)
     read_time = models.IntegerField()
     claps = models.IntegerField()
+    content = models.CharField(max_length=1000)
     url = models.URLField()
     date_posted = models.DateField()
     subject = models.CharField(max_length=255)

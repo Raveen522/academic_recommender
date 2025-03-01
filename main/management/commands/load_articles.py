@@ -19,6 +19,7 @@ class Command(BaseCommand):
                         topic=row['Topic'],
                         read_time=row['Read Time'],
                         claps=row['Claps'],
+                        content=row['Content'],
                         url=row['URL'],
                         date_posted=row['Date posted'],
                         subject=sheet_name  # Use sheet name as the subject

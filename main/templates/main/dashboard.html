@@ -2,162 +2,189 @@
 {% load filters %} 
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 bg-light p-4 border-right">
-            <h4 class="mb-4">Hi, {{ first_name }}!</h4>
+<!-- Header Bar -->
+<nav class="navbar navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h4">📚 Academic Recommender</span>
+    </div>
+</nav>
 
-            <!-- Home and Logout icon buttons -->
-            <div class="mb-4 d-flex justify-content-start">
-                <button class="btn btn-primary" onclick="window.location.reload();" title="Home">
-                    <i class="bi bi-house-door"></i> <!-- Home icon -->
-                </button>
-                <form method="post" action="{% url 'dashboard' %}">
-                    {% csrf_token %}
-                    <button type="submit" name="logout" class="btn btn-danger ms-2" title="Logout">
-                        <i class="bi bi-box-arrow-right"></i> <!-- Logout icon -->
+<div class="container mt-5">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 bg-light p-4 border-right">
+                <h4 class="mb-4">Hi, {{ first_name }}!</h4>
+
+                <!-- Home and Logout icon buttons -->
+                <div class="mb-4 d-flex justify-content-start">
+                    <button class="btn btn-primary" onclick="window.location.reload();" title="Home">
+                        <i class="bi bi-house-door"></i> <!-- Home icon -->
                     </button>
-                </form>
-            </div>
-
-            <!-- Dropdown for subjects -->
-            <div class="mb-4">
-                <label for="subjectsDropdown" class="form-label">Select your academic interests</label>
-                <select id="subjectsDropdown" class="form-select">
-                    <option>Computer Science</option>
-                    <option>Mathematics</option>
-                    <option>Electronics</option>
-                    <option>Industrial Management</option>
-                </select>
-            </div>
-
-            <!-- Display user-selected interests -->
-            <div class="mb-4">
-                <h5>Your Selected Interests:</h5>
-                <ul id="userInterests">
-                    {% for interest in interests %}
-                        <li>{{ interest }}</li>
-                    {% empty %}
-                        <li>No interests selected</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <!-- Primary Area -->
-        <div class="col-md-9">
-            <div class="container-fluid p-4">
-                <!-- Search Bar -->
-                <div class="mb-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search..." aria-label="Search">
-                        <button class="btn btn-outline-secondary" type="button">
-                            <i class="bi bi-search"></i> <!-- Bootstrap Icons for search icon -->
+                    <form method="post" action="{% url 'dashboard' %}">
+                        {% csrf_token %}
+                        <button type="submit" name="logout" class="btn btn-danger ms-2" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i> <!-- Logout icon -->
                         </button>
-                    </div>
+                    </form>
                 </div>
 
-                <!-- Tabs (Recommendations and History) -->
-                <ul class="nav nav-tabs" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="recommendations-tab" data-bs-toggle="tab" href="#recommendations" role="tab" aria-controls="recommendations" aria-selected="true">Recommendations</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" role="tab" aria-controls="history" aria-selected="false">History</a>
-                    </li>
-                </ul>
+                <!-- Dropdown for subjects -->
+                <div class="mb-4">
+                    <label for="subjectsDropdown" class="form-label">Select your academic interests</label>
+                    <select id="subjectsDropdown" class="form-select">
+                        <option>Computer Science</option>
+                        <option>Mathematics</option>
+                        <option>Electronics</option>
+                        <option>Industrial Management</option>
+                    </select>
+                </div>
 
-                <div class="tab-content" id="myTabContent">
-                    <!-- Recommendations Tab -->
-                    <div class="tab-pane fade show active" id="recommendations" role="tabpanel" aria-labelledby="recommendations-tab">
-                        <div class="row">
+                <!-- Display user-selected interests -->
+                <div class="mb-4">
+                    <h5>Your Selected Interests:</h5>
+                    <ul id="userInterests">
+                        {% for interest in interests %}
+                            <li>{{ interest }}</li>
+                        {% empty %}
+                            <li>No interests selected</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-                            <div class="container">
-                                <h2>Welcome, {{ first_name }}</h2>
-                                <p>Your interests: {{ interests|join:", " }}</p>
-                                
-                                <div class="row">
-                                    {% for article in recommendations %}
-                                    <div class="col-md-4">
-                                        <div class="card mb-3">
-                                            <div class="card-body">
-                                                <h5 class="card-title">{{ article.title }}</h5>
-                                                <p class="card-text">
-                                                    Tags: 
-                                                    {% for tag in article.tags_list %}
-                                                    <span class="badge bg-secondary">{{ tag }}</span>
-                                                    {% endfor %}
-                                                </p>
-                                                <a href="{{ article.url }}" class="btn btn-primary" target="_blank">Read More</a>
-                                            </div>
-                                            <div class="card-footer text-end">
-                                                <button 
-                                                    class="btn btn-outline-success like-btn {% if article.reaction == 'like' %}active{% endif %}" 
-                                                    data-article-id="{{ article.id }}" 
-                                                    data-reaction="like">
-                                                    👍 Like
-                                                </button>
-                                                <button 
-                                                    class="btn btn-outline-danger dislike-btn {% if article.reaction == 'dislike' %}active{% endif %}" 
-                                                    data-article-id="{{ article.id }}" 
-                                                    data-reaction="dislike">
-                                                    👎 Dislike
-                                                </button>
+            <!-- Primary Area -->
+            <div class="col-md-9">
+                <div class="container-fluid p-4">
+                    <!-- Search Bar -->
+                    <div class="mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search..." aria-label="Search">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i> <!-- Bootstrap Icons for search icon -->
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabs (Recommendations, History, Insights) -->
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="recommendations-tab" data-bs-toggle="tab" href="#recommendations" role="tab" aria-controls="recommendations" aria-selected="true">Recommendations</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" role="tab" aria-controls="history" aria-selected="false">History</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="insights-tab" data-bs-toggle="tab" href="#insights" role="tab" aria-controls="insights" aria-selected="false">Insights</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="myTabContent">
+                        <!-- Recommendations Tab -->
+                        <div class="tab-pane fade show active" id="recommendations" role="tabpanel" aria-labelledby="recommendations-tab">
+                            <div class="row">
+                                <div class="container">                                    
+                                    <div class="container py-4">
+                                        <div class="row justify-content-center">
+                                            <div class="col-12 col-lg-10">
+                                                {% for article in recommendations %}
+                                                <div class="card mb-4">
+                                                    <div class="card-content p-4">
+                                                        <!-- Title Section -->
+                                                        <div class="article-title pb-3 mb-3">
+                                                            <h5 class="m-0">{{ article.title }}</h5>
+                                                        </div>
+                                                        
+                                                        <!-- Author Section -->
+                                                        <div class="article-author pb-3 mb-3">
+                                                            <span>Author: {{ article.author }}</span>
+                                                        </div>
+                                                        
+                                                        <!-- Tags Section -->
+                                                        <div class="article-tags pb-3 mb-3">
+                                                            <span>Tags: </span>
+                                                            {% for tag in article.tags_list %}
+                                                            <span class="tag me-2">💡 {{ tag }}</span>
+                                                            {% endfor %}
+                                                        </div>
+                                                        
+                                                        <!-- Actions Section -->
+                                                        <div class="article-actions d-flex justify-content-between align-items-center">
+                                                            <div class="left-action">
+                                                                <a href="{{ article.url }}" class="btn btn-primary read-more" target="_blank">Read More</a>
+                                                            </div>
+                                                            <div class="right-action">
+                                                                <button class="btn btn-outline-success like-btn ms-2 {% if article.reaction == 'like' %}active{% endif %}"
+                                                                        data-article-id="{{ article.id }}" 
+                                                                        data-reaction="like">
+                                                                    👍 Like
+                                                                </button>
+                                                                <button class="btn btn-outline-danger dislike-btn ms-2 {% if article.reaction == 'dislike' %}active{% endif %}"
+                                                                        data-article-id="{{ article.id }}" 
+                                                                        data-reaction="dislike">
+                                                                    👎 Dislike
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
                                             </div>
                                         </div>
                                     </div>
-                                    {% endfor %}
+                                    
                                 </div>
-                            </div>
-                            
-                            <script>
-                                document.addEventListener("DOMContentLoaded", () => {
-                                    const buttons = document.querySelectorAll(".like-btn, .dislike-btn");
-                            
-                                    buttons.forEach(button => {
-                                        button.addEventListener("click", (e) => {
-                                            const articleId = e.target.getAttribute("data-article-id");
-                                            const reaction = e.target.getAttribute("data-reaction");
-                            
-                                            fetch("{% url 'react_to_article' %}", {
-                                                method: "POST",
-                                                headers: {
-                                                    "Content-Type": "application/x-www-form-urlencoded",
-                                                    "X-CSRFToken": "{{ csrf_token }}"
-                                                },
-                                                body: `article_id=${articleId}&reaction=${reaction}`
-                                            })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                if (data.success) {
-                                                    // Update button styles based on the reaction
-                                                    buttons.forEach(btn => {
-                                                        if (btn.getAttribute("data-article-id") === articleId) {
-                                                            if (btn.getAttribute("data-reaction") === reaction) {
-                                                                btn.classList.add("active");
-                                                            } else {
-                                                                btn.classList.remove("active");
+                                
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", () => {
+                                        const buttons = document.querySelectorAll(".like-btn, .dislike-btn");
+                                
+                                        buttons.forEach(button => {
+                                            button.addEventListener("click", (e) => {
+                                                const articleId = e.target.getAttribute("data-article-id");
+                                                const reaction = e.target.getAttribute("data-reaction");
+                                
+                                                fetch("{% url 'react_to_article' %}", {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type": "application/x-www-form-urlencoded",
+                                                        "X-CSRFToken": "{{ csrf_token }}"
+                                                    },
+                                                    body: `article_id=${articleId}&reaction=${reaction}`
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    if (data.success) {
+                                                        // Update button styles based on the reaction
+                                                        buttons.forEach(btn => {
+                                                            if (btn.getAttribute("data-article-id") === articleId) {
+                                                                if (btn.getAttribute("data-reaction") === reaction) {
+                                                                    btn.classList.add("active");
+                                                                } else {
+                                                                    btn.classList.remove("active");
+                                                                }
                                                             }
-                                                        }
-                                                    });
-                                                }
-                                            })
-                                            .catch(error => console.error("Error:", error));
+                                                        });
+                                                    }
+                                                })
+                                                .catch(error => console.error("Error:", error));
+                                            });
                                         });
                                     });
-                                });
-                            </script>
-                            
-                            
+                                </script>
+                            </div>
                         </div>
-                    </div>
-                    
 
-                    <!-- History Tab -->
-                    <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
-                        <!-- Content for History will go here -->
-                        <p>Your search or browsing history will be shown here.</p>
+                        <!-- History Tab -->
+                        <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+                            <p>Your search or browsing history will be shown here.</p>
+                        </div>
+
+                        <!-- Insights Tab -->
+                        <div class="tab-pane fade" id="insights" role="tabpanel" aria-labelledby="insights-tab">
+                            <h4>Insights</h4>
+                            <p>Get analytics and trends about your reading habits here.</p>
+                        </div>
                     </div>
                 </div>
             </div>

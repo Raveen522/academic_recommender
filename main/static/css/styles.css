@@ -1,10 +1,3 @@
-.card {
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    background: white;
-    max-width: 800px;
-    margin: 20px auto;
-}
 .tag {
     background: #f8f9fa;
     padding: 4px 12px;
@@ -60,4 +53,64 @@ button.active {
     background-color: #28a745;
     color: white;
     border: none;
+}
+
+
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: white;
+    overflow: hidden;
+}
+
+.article-title, .article-author, .article-tags {
+    border-bottom: 1px solid #eee;
+}
+
+.read-more {
+    background-color: #0d6efd;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.like-btn, .dislike-btn {
+    border: 1px solid;
+    padding: 4px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.like-btn {
+    border-color: #198754;
+    color: #198754;
+}
+
+.dislike-btn {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.like-btn.active {
+    background-color: #198754;
+    color: white;
+}
+
+.dislike-btn.active {
+    background-color: #dc3545;
+    color: white;
+}
+
+@media (max-width: 576px) {
+    .article-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .right-action {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
 }
