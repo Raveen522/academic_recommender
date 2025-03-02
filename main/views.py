@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import UserProfile
 from django.contrib.auth.decorators import login_required
-from main.utils.recommendation import get_recommendations
+# from main.utils.recommendation import get_recommendations
 
 # Login view
 def login_view(request):
@@ -82,6 +82,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Article, UserProfile, UserReaction
 from django.views.decorators.csrf import csrf_exempt
+from .utils.recommendation import get_hybrid_recommendations
 
 @login_required
 def dashboard_view(request):
@@ -91,13 +92,16 @@ def dashboard_view(request):
     
     user_profile = request.user.profile
     user_interests = user_profile.interests.split(',')
+    recommendations = get_hybrid_recommendations(user_profile)
 
-    recommendations = Article.objects.all()  # Replace with actual recommendation logic
+    # recommendations = Article.objects.all()  # Replace with actual recommendation logic
 
     # Fetch user reactions (ratings) for the logged-in user
     user_ratings = {reaction.article.id: reaction.rating for reaction in UserReaction.objects.filter(user_profile=user_profile)}
 
-    for article in recommendations:
+    articles = Article.objects.filter(id__in=recommendations)
+
+    for article in articles:
         article.rating = user_ratings.get(article.id, 0)  # Default to 0 if no rating
         article.tags_list = article.tags.split(',') if article.tags else []
 
@@ -105,9 +109,8 @@ def dashboard_view(request):
         "user": request.user,
         "first_name": user_profile.first_name,
         "interests": user_interests,
-        "recommendations": recommendations,
+        "recommendations": articles,  # Pass the actual Article objects
     })
-
 
 
 from django.http import JsonResponse
