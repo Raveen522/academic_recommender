@@ -88,8 +88,8 @@
                                         <div class="row justify-content-center">
                                             <div class="col-12 col-lg-10">
                                                 {% for article in recommendations %}
-                                                <div class="card mb-4">
-                                                    <div class="card-content p-4">
+                                                <div class="card mb-3">
+                                                    <div class="card-body">
                                                         <!-- Title Section -->
                                                         <div class="article-title pb-3 mb-3">
                                                             <h5 class="m-0">{{ article.title }}</h5>
@@ -107,28 +107,26 @@
                                                             <span class="tag me-2">💡 {{ tag }}</span>
                                                             {% endfor %}
                                                         </div>
-                                                        
+
                                                         <!-- Actions Section -->
                                                         <div class="article-actions d-flex justify-content-between align-items-center">
                                                             <div class="left-action">
                                                                 <a href="{{ article.url }}" class="btn btn-primary read-more" target="_blank">Read More</a>
                                                             </div>
                                                             <div class="right-action">
-                                                                <button class="btn btn-outline-success like-btn ms-2 {% if article.reaction == 'like' %}active{% endif %}"
-                                                                        data-article-id="{{ article.id }}" 
-                                                                        data-reaction="like">
-                                                                    👍 Like
-                                                                </button>
-                                                                <button class="btn btn-outline-danger dislike-btn ms-2 {% if article.reaction == 'dislike' %}active{% endif %}"
-                                                                        data-article-id="{{ article.id }}" 
-                                                                        data-reaction="dislike">
-                                                                    👎 Dislike
-                                                                </button>
+                                                                <!-- Star Rating -->
+                                                                <div id="article-{{ article.id }}">
+                                                                    {% for i in "12345" %}
+                                                                        <span class="star" data-article-id="{{ article.id }}" data-value="{{ i }}" style="cursor: pointer; font-size: 25px; color: {% if article.rating >= i|add:0 %}gold{% else %}gray{% endif %};">
+                                                                            ★
+                                                                        </span>
+                                                                    {% endfor %}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                {% endfor %}
+                                            {% endfor %}
                                             </div>
                                         </div>
                                     </div>
@@ -136,38 +134,33 @@
                                 </div>
                                 
                                 <script>
-                                    document.addEventListener("DOMContentLoaded", () => {
-                                        const buttons = document.querySelectorAll(".like-btn, .dislike-btn");
-                                
-                                        buttons.forEach(button => {
-                                            button.addEventListener("click", (e) => {
-                                                const articleId = e.target.getAttribute("data-article-id");
-                                                const reaction = e.target.getAttribute("data-reaction");
-                                
-                                                fetch("{% url 'react_to_article' %}", {
-                                                    method: "POST",
-                                                    headers: {
-                                                        "Content-Type": "application/x-www-form-urlencoded",
-                                                        "X-CSRFToken": "{{ csrf_token }}"
-                                                    },
-                                                    body: `article_id=${articleId}&reaction=${reaction}`
-                                                })
-                                                .then(response => response.json())
-                                                .then(data => {
-                                                    if (data.success) {
-                                                        // Update button styles based on the reaction
-                                                        buttons.forEach(btn => {
-                                                            if (btn.getAttribute("data-article-id") === articleId) {
-                                                                if (btn.getAttribute("data-reaction") === reaction) {
-                                                                    btn.classList.add("active");
-                                                                } else {
-                                                                    btn.classList.remove("active");
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                })
-                                                .catch(error => console.error("Error:", error));
+                                    function submitRating(articleId, rating) {
+                                        fetch("{% url 'react_to_article' %}", {
+                                            method: "POST",
+                                            headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/x-www-form-urlencoded" },
+                                            body: `article_id=${articleId}&rating=${rating}`
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                updateStars(articleId, data.rating);
+                                            }
+                                        });
+                                    }
+                                    
+                                    function updateStars(articleId, rating) {
+                                        let stars = document.querySelectorAll(`#article-${articleId} .star`);
+                                        stars.forEach((star, index) => {
+                                            star.style.color = index < rating ? "yellow" : "gray";
+                                        });
+                                    }
+                                    
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        document.querySelectorAll(".star").forEach(star => {
+                                            star.addEventListener("click", function() {
+                                                let articleId = this.dataset.articleId;
+                                                let rating = this.dataset.value;
+                                                submitRating(articleId, rating);
                                             });
                                         });
                                     });

@@ -36,19 +36,12 @@ class Article(models.Model):
     
 
 class UserReaction(models.Model):
-    LIKE = 'like'
-    DISLIKE = 'dislike'
-    REACTION_CHOICES = [
-        (LIKE, 'Like'),
-        (DISLIKE, 'Dislike'),
-    ]
-
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='reactions')
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='reactions')
-    reaction = models.CharField(max_length=10, choices=REACTION_CHOICES)
+    rating = models.IntegerField(default=0)  # Store rating (1 to 5)
 
     class Meta:
-        unique_together = ('user_profile', 'article')  # Ensure one reaction per article per user
+        unique_together = ('user_profile', 'article')  # One rating per article per user
 
     def __str__(self):
-        return f"{self.user_profile.user.username} - {self.article.title} - {self.reaction}"
+        return f"{self.user_profile.user.username} - {self.article.title} - {self.rating} stars"

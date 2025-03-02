@@ -114,3 +114,18 @@ button.active {
         justify-content: flex-end;
     }
 }
+
+.rating-container {
+    cursor: pointer;
+}
+
+.star {
+    font-size: 24px;
+    color: gray; /* Default color */
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.star.selected {
+    color: gold; /* Change to gold when selected */
+}

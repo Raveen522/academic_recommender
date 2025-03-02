@@ -77,10 +77,11 @@ def interest_selection_view(request):
     return render(request, 'main/interest_selection.html')
 
 # Dashboard view
-from .models import Article, UserProfile, UserReaction  # Ensure models are imported
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Article, UserProfile, UserReaction
+from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def dashboard_view(request):
@@ -88,20 +89,16 @@ def dashboard_view(request):
         logout(request)
         return redirect("login")
     
-    # Fetch the user's profile and interests
     user_profile = request.user.profile
-    user_interests = user_profile.interests.split(',')  # Convert interests string to a list
-    
-    # Fetch recommendations (this can be your recommendation logic)
+    user_interests = user_profile.interests.split(',')
+
     recommendations = Article.objects.all()  # Replace with actual recommendation logic
 
-    # Fetch user reactions for the logged-in user
-    user_reactions = UserReaction.objects.filter(user_profile=user_profile)
-    reacted_articles = {reaction.article.id: reaction.reaction for reaction in user_reactions}
+    # Fetch user reactions (ratings) for the logged-in user
+    user_ratings = {reaction.article.id: reaction.rating for reaction in UserReaction.objects.filter(user_profile=user_profile)}
 
-    # Add reaction info and tags for each article
     for article in recommendations:
-        article.reaction = reacted_articles.get(article.id, None)
+        article.rating = user_ratings.get(article.id, 0)  # Default to 0 if no rating
         article.tags_list = article.tags.split(',') if article.tags else []
 
     return render(request, "main/dashboard.html", {
@@ -121,20 +118,20 @@ from django.views.decorators.csrf import csrf_exempt
 def react_to_article(request):
     if request.method == "POST":
         article_id = request.POST.get('article_id')
-        reaction = request.POST.get('reaction')  # 'like' or 'dislike'
+        rating = request.POST.get('rating')  # 1 to 5
 
         try:
             article = Article.objects.get(id=article_id)
             user_profile = request.user.profile
 
-            # Update or create reaction
+            # Update or create the rating
             user_reaction, created = UserReaction.objects.update_or_create(
                 user_profile=user_profile,
                 article=article,
-                defaults={'reaction': reaction}
+                defaults={'rating': int(rating)}
             )
 
-            return JsonResponse({"success": True, "reaction": user_reaction.reaction})
+            return JsonResponse({"success": True, "rating": user_reaction.rating})
         except Article.DoesNotExist:
             return JsonResponse({"success": False, "error": "Article not found"})
     
