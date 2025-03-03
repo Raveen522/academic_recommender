@@ -83,33 +83,109 @@ from django.http import JsonResponse
 from .models import Article, UserProfile, UserReaction
 from django.views.decorators.csrf import csrf_exempt
 from .utils.recommendation import get_hybrid_recommendations
+from django.db.models import Q
+
 
 @login_required
 def dashboard_view(request):
     if request.method == "POST" and "logout" in request.POST:
         logout(request)
         return redirect("login")
-    
+
     user_profile = request.user.profile
     user_interests = user_profile.interests.split(',')
-    recommendations = get_hybrid_recommendations(user_profile)
 
-    # recommendations = Article.objects.all()  # Replace with actual recommendation logic
+    # Get recommended articles (excluding interacted ones)
+    recommended_ids = get_hybrid_recommendations(user_profile)
+    recommended_articles = Article.objects.filter(id__in=recommended_ids)
 
-    # Fetch user reactions (ratings) for the logged-in user
-    user_ratings = {reaction.article.id: reaction.rating for reaction in UserReaction.objects.filter(user_profile=user_profile)}
+    # Fetch user ratings (interacted articles)
+    user_reactions = UserReaction.objects.filter(user_profile=user_profile)
+    history_articles = [reaction.article for reaction in user_reactions]
 
-    articles = Article.objects.filter(id__in=recommendations)
-
-    for article in articles:
-        article.rating = user_ratings.get(article.id, 0)  # Default to 0 if no rating
+    # Assign ratings to articles
+    user_ratings = {reaction.article.id: reaction.rating for reaction in user_reactions}
+    
+    for article in recommended_articles:
+        article.rating = user_ratings.get(article.id, 0)
         article.tags_list = article.tags.split(',') if article.tags else []
+
+    for article in history_articles:
+        article.rating = user_ratings.get(article.id, 0)
+        article.tags_list = article.tags.split(',') if article.tags else []
+
+    # Search Feature
+    query = request.GET.get('q', '')
+    search_results = []
+    search_active = False  # Default to Recommendations Tab
+
+    if query:
+        search_results = Article.objects.filter(
+            Q(title__icontains=query) |
+            Q(tags__icontains=query) |
+            Q(topic__icontains=query) |
+            Q(author__icontains=query) |
+            Q(subject__icontains=query)
+        ).distinct()
+        search_active = True  # Activate the Search Results Tab
+
+    # Insights Data
+    total_articles_read = len(history_articles)
+    total_reading_time = sum([article.read_time for article in history_articles])
+    avg_reading_time = total_reading_time / total_articles_read if total_articles_read > 0 else 0
+    total_ratings_given = len(user_reactions)
+    engagement_score = total_reading_time * total_ratings_given  
+
+    # Count articles read per subject
+    subject_counts = {}
+    for article in history_articles:
+        subject_counts[article.subject] = subject_counts.get(article.subject, 0) + 1
+
+    most_read_subject = max(subject_counts, key=subject_counts.get, default="N/A")
+    max_subject_reads = subject_counts.get(most_read_subject, 0)
+
+    # Convert subject count to lists for graph plotting
+    subjects = list(subject_counts.keys())
+    subject_read_counts = list(subject_counts.values())
+
+    # Ratings distribution
+    rating_counts = {i: 0 for i in range(1, 6)} 
+    for reaction in user_reactions:
+        rating_counts[reaction.rating] += 1
+
+    rating_counts_list = list(rating_counts.values())
+
+    # Radar Chart Data (Interest Profile)
+    radar_chart_data = {interest: subject_counts.get(interest, 0) / max_subject_reads if max_subject_reads > 0 else 0 for interest in subjects}
+
+    # Convert Interest Profile to lists for graph plotting
+    radar_Labels = list(radar_chart_data.keys())
+    radar_Values = list(radar_chart_data.values())
 
     return render(request, "main/dashboard.html", {
         "user": request.user,
         "first_name": user_profile.first_name,
         "interests": user_interests,
-        "recommendations": articles,  # Pass the actual Article objects
+        "recommendations": recommended_articles,
+        "history": history_articles,
+        "search_results": search_results,  # Search results for the Search Results tab
+        "query": query,  # Pass the search query back to the template
+        "search_active": search_active,  # Indicates if search tab should be active
+        # Insights Data
+        "total_articles_read": total_articles_read,
+        "total_reading_time": total_reading_time,
+        "avg_reading_time": avg_reading_time,
+        "total_ratings_given": total_ratings_given,
+        "engagement_score": engagement_score,
+        "most_read_subject": most_read_subject,
+        "max_subject_reads": max_subject_reads,
+        "subjects": subjects,
+        "subject_read_counts": subject_read_counts,
+        "rating_counts": rating_counts,
+        "rating_counts_list": rating_counts_list,
+        "radar_chart_data": radar_chart_data,
+        "radar_Labels": radar_Labels,
+        "radar_Values": radar_Values,
     })
 
 

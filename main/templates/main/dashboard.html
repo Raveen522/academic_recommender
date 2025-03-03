@@ -45,20 +45,25 @@
             <!-- Primary Area -->
             <div class="col-md-9">
                 <div class="container-fluid p-4">
-                    <!-- Search Bar -->
-                    <div class="mb-4">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search..." aria-label="Search">
-                            <button class="btn btn-outline-secondary" type="button">
-                                <i class="bi bi-search"></i> <!-- Bootstrap Icons for search icon -->
-                            </button>
-                        </div>
-                    </div>
+<!-- Search Bar -->
+<div class="mb-4">
+    <form id="search-form" method="GET" action="{% url 'dashboard' %}">
+        <div class="input-group">
+            <input type="text" class="form-control" name="q" placeholder="Search articles..." aria-label="Search" value="{{ query }}">
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+</div>
 
-                    <!-- Tabs (Recommendations, History, Insights) -->
+                    <!-- Tabs (Recommendations, Search Results, History, Insights) -->
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a class="nav-link active" id="recommendations-tab" data-bs-toggle="tab" href="#recommendations" role="tab" aria-controls="recommendations" aria-selected="true">Recommendations</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="searchresults-tab" data-bs-toggle="tab" href="#searchresults" role="tab" aria-controls="searchresults" aria-selected="true">Search Results</a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" id="history-tab" data-bs-toggle="tab" href="#history" role="tab" aria-controls="history" aria-selected="false">History</a>
@@ -87,6 +92,14 @@
                                                         <!-- Author Section -->
                                                         <div class="article-author pb-3 mb-3">
                                                             <span>Author: {{ article.author }}</span>
+                                                        </div>
+                                                        <!-- Read time Section -->
+                                                        <div class="article-author pb-3 mb-3">
+                                                            <span>Read Time: {{ article.read_time }} min</span>
+                                                        </div>
+                                                        <!-- Subject Section -->
+                                                        <div class="article-author pb-3 mb-3">
+                                                            <span>Subject: {{ article.subject }}</span>
                                                         </div>
                                                         
                                                         <!-- Tags Section -->
@@ -157,15 +170,245 @@
                             </div>
                         </div>
 
+<!-- Search Results Tab -->
+<div class="tab-pane fade" id="searchresults" role="tabpanel" aria-labelledby="searchresults-tab">
+    <h4>Search Results</h4>
+    
+    {% if query %}
+        <p>Showing results for: <strong>{{ query }}</strong></p>
+    {% endif %}
+    
+    {% if search_results %}
+        <div class="row">
+            {% for article in search_results %}
+                <div class="col-12 col-lg-10">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <!-- Title Section -->
+                            <div class="article-title pb-3 mb-3">
+                                <h5 class="m-0">{{ article.title }}</h5>
+                            </div>
+                            
+                            <!-- Author Section -->
+                            <div class="article-author pb-3 mb-3">
+                                <span>Author: {{ article.author }}</span>
+                            </div>
+                            <!-- Read time Section -->
+                            <div class="article-author pb-3 mb-3">
+                                <span>Read Time: {{ article.read_time }} min</span>
+                            </div>
+
+                            <!-- Subject Section -->
+                            <div class="article-author pb-3 mb-3">
+                                <span>Subject: {{ article.subject }}</span>
+                            </div>
+
+                            <!-- Actions Section -->
+                            <div class="article-actions d-flex justify-content-between align-items-center">
+                                <div class="left-action">
+                                    <a href="{{ article.url }}" class="btn btn-primary read-more" target="_blank">Read More</a>
+                                </div>
+                                <div class="right-action">
+                                    <!-- Star Rating -->
+                                    <div id="article-{{ article.id }}">
+                                        {% for i in "12345" %}
+                                            <span class="star" data-article-id="{{ article.id }}" data-value="{{ i }}" style="cursor: pointer; font-size: 25px; color: {% if article.rating >= i|add:0 %}gold{% else %}gray{% endif %};">
+                                                ★
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</div>
+
+
                         <!-- History Tab -->
                         <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
-                            <p>Your search or browsing history will be shown here.</p>
+                            <div class="row">
+                                <div class="container">                                    
+                                    <div class="container py-4">
+                                        <div class="row justify-content-center">
+                                            <div class="col-12 col-lg-10">
+                                                {% for article in history %}
+                                                <div class="col-mb-3">
+                                                    <div class="card mb-3">
+                                                        <div class="card-body">
+                                                            <!-- Title Section -->
+                                                            <div class="article-title pb-3 mb-3">
+                                                                <h5 class="m-0">{{ article.title }}</h5>
+                                                            </div>
+                                                            
+                                                            <!-- Author Section -->
+                                                            <div class="article-author pb-3 mb-3">
+                                                                <span>Author: {{ article.author }}</span>
+                                                            </div>
+                                                            
+                                                            <!-- Tags Section -->
+                                                            <div class="article-tags pb-3 mb-3">
+                                                                <span>Tags: </span>
+                                                                {% for tag in article.tags_list %}
+                                                                <span class="tag me-2">💡 {{ tag }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                
+                                                            <!-- Actions Section -->
+                                                            <div class="article-actions d-flex justify-content-between align-items-center">
+                                                                <div class="left-action">
+                                                                    <a href="{{ article.url }}" class="btn btn-primary read-more" target="_blank">Read More</a>
+                                                                </div>
+                                                                <div class="right-action">
+                                                                    <!-- Star Rating -->
+                                                                    <div id="article-{{ article.id }}">
+                                                                        {% for i in "12345" %}
+                                                                            <span class="star" data-article-id="{{ article.id }}" data-value="{{ i }}" style="cursor: pointer; font-size: 25px; color: {% if article.rating >= i|add:0 %}gold{% else %}gray{% endif %};">
+                                                                                ★
+                                                                            </span>
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% empty %}
+                                                <p>No articles in history yet.</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Insights Tab -->
                         <div class="tab-pane fade" id="insights" role="tabpanel" aria-labelledby="insights-tab">
                             <h4>Insights</h4>
                             <p>Get analytics and trends about your reading habits here.</p>
+                        
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Total Articles Read:</h5>
+                                    <p>{{ total_articles_read }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Average Reading Time:</h5>
+                                    <p>{{ avg_reading_time }} minutes</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Most Read Subject:</h5>
+                                    <p>{{ most_read_subject }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Total Ratings Given:</h5>
+                                    <p>{{ total_ratings_given }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Engagement Score:</h5>
+                                    <p>{{ engagement_score }}</p>
+                                </div>
+                            </div>
+                        
+                            <!-- Graphs -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>Articles Read per Subject</h5>
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Reading Time Distribution</h5>
+                                    <canvas id="pieChart"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Rating Distribution</h5>
+                                    <canvas id="histogramChart"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>Interest Profile</h5>
+                                    <canvas id="radarChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <script>
+
+                                var subjects = {{ subjects|safe }};
+                                var subjectReadCounts = {{ subject_read_counts|safe }};
+                                var ratingCountsList = {{ rating_counts_list|safe }};
+                                var radarLabels = {{ radar_Labels|safe }};
+                                var radarData = {{ radar_Values|safe }};
+
+                                console.log("Subjects:", {{ subjects|safe }});
+                                console.log("Subject Read Counts:", {{ subject_read_counts|safe }});
+                                console.log("Rating Counts:", {{ rating_counts_list|safe }});
+                                
+                                // Bar Chart (Articles Read per Subject)
+                                var ctx1 = document.getElementById('barChart').getContext('2d');
+                                var barChart = new Chart(ctx1, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: {{ subjects|safe }},
+                                        datasets: [{
+                                            label: 'Articles Read',
+                                            data: {{ subject_read_counts|safe }},
+                                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                            borderColor: 'rgba(54, 162, 235, 1)',
+                                            borderWidth: 1
+                                        }]
+                                    }
+                                });
+                                
+                                // Pie Chart (Reading Time Distribution)
+                                var ctx2 = document.getElementById('pieChart').getContext('2d');
+                                new Chart(ctx2, {
+                                    type: 'pie',
+                                    data: {
+                                        labels: subjects,
+                                        datasets: [{
+                                            data: subjectReadCounts,
+                                            backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff']
+                                        }]
+                                    }
+                                });
+                                
+                                // Histogram (Rating Distribution)
+                                var ctx3 = document.getElementById('histogramChart').getContext('2d');
+                                new Chart(ctx3, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                                        datasets: [{
+                                            label: 'Ratings Given',
+                                            data: ratingCountsList,
+                                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                                            borderColor: 'rgba(255, 99, 132, 1)',
+                                            borderWidth: 1
+                                        }]
+                                    }
+                                });
+                                
+                                // Radar Chart (Interest Profile)
+                                var ctx4 = document.getElementById('radarChart').getContext('2d');
+                                new Chart(ctx4, {
+                                    type: 'radar',
+                                    data: {
+                                        labels: radarLabels,
+                                        datasets: [{
+                                            label: 'Interest Engagement',
+                                            data: radarData,
+                                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                            borderColor: 'rgba(75, 192, 192, 1)',
+                                            borderWidth: 1
+                                        }]
+                                    }
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>
